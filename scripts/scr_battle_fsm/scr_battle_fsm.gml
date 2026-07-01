@@ -10,6 +10,8 @@ enum BATTLE_STATE {
     BOARD_INIT,         // build the board, wait for it to settle
     PLAYER_INPUT,       // idle; awaiting a swap intent from the input handler
     ANIMATING_SWAP,     // the two swapped tiles tween into place
+    RESOLVING_WORD,     // validate and clear a traced word
+    RESOLVING_MIRACLE,  // clear-type miracle routed through cascades
     RESOLVING_MATCHES,  // scan the board (the decision hub)
     SWAP_BACK,          // illegal move: revert the swap
     CLEARING_MATCHES,   // matched tiles animate out
@@ -30,6 +32,8 @@ function battle_state_name(_s) {
         case BATTLE_STATE.BOARD_INIT:        return "BOARD_INIT";
         case BATTLE_STATE.PLAYER_INPUT:      return "PLAYER_INPUT";
         case BATTLE_STATE.ANIMATING_SWAP:    return "ANIMATING_SWAP";
+        case BATTLE_STATE.RESOLVING_WORD:    return "RESOLVING_WORD";
+        case BATTLE_STATE.RESOLVING_MIRACLE: return "RESOLVING_MIRACLE";
         case BATTLE_STATE.RESOLVING_MATCHES: return "RESOLVING_MATCHES";
         case BATTLE_STATE.SWAP_BACK:         return "SWAP_BACK";
         case BATTLE_STATE.CLEARING_MATCHES:  return "CLEARING_MATCHES";

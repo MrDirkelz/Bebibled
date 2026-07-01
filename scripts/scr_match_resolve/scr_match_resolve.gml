@@ -71,7 +71,37 @@ function match_resolve(_grid, _groups, _swap_cells, _combo, _cols, _rows) {
         }
     }
 
-    // --- expand any PRE-EXISTING special tiles caught in the clear (chain reactions) ---
+    _clearlist = expand_specials(_grid, _clearlist, _cols, _rows);
+    var _clear_res = clearlist_resolve(_grid, _clearlist, _combo, _cols, _rows);
+
+    // flatten special map
+    var _specials = [];
+    var _names = variable_struct_get_names(_spec_map);
+    for (var i = 0; i < array_length(_names); i++) {
+        array_push(_specials, _spec_map[$ _names[i]]);
+    }
+
+    return {
+        clear_cells   : _clear_res.clear_cells,
+        specials      : _specials,
+        letters       : _clear_res.letters,
+        tiles_cleared : _clear_res.tiles_cleared,
+        damage        : _clear_res.damage,
+        charge        : _clear_res.charge,
+        divine_cleared: _clear_res.divine_cleared
+    };
+}
+
+/// @desc Expand PRE-EXISTING special tiles caught in a clear list.
+function expand_specials(_grid, _base_list, _cols, _rows) {
+    var _clearmap = {};
+    var _clearlist = [];
+
+    for (var i = 0; i < array_length(_base_list); i++) {
+        var _cell = _base_list[i];
+        _match_add(_clearmap, _clearlist, _cell.col, _cell.row);
+    }
+
     var _idx = 0;
     while (_idx < array_length(_clearlist)) {
         var _cell = _clearlist[_idx];
@@ -87,21 +117,18 @@ function match_resolve(_grid, _groups, _swap_cells, _combo, _cols, _rows) {
                 case TILE_TYPE.BOMB:
                     for (var _dc = -1; _dc <= 1; _dc++) {
                         for (var _dr = -1; _dr <= 1; _dr++) {
-                            var _nc = _cell.col + _dc, _nr = _cell.row + _dr;
-                            if (_nc >= 0 && _nc < _cols && _nr >= 0 && _nr < _rows) {
-                                _match_add(_clearmap, _clearlist, _nc, _nr);
-                            }
+                            var _nc = _cell.col + _dc;
+                            var _nr = _cell.row + _dr;
+                            if (_nc >= 0 && _nc < _cols && _nr >= 0 && _nr < _rows) _match_add(_clearmap, _clearlist, _nc, _nr);
                         }
                     }
                     break;
                 case TILE_TYPE.RAINBOW:
                     var _target = _t.color_id;
-                    for (var _c = 0; _c < _cols; _c++) {
-                        for (var _r = 0; _r < _rows; _r++) {
-                            var _o = _grid[_c][_r];
-                            if (_o != undefined && _o.color_id == _target) {
-                                _match_add(_clearmap, _clearlist, _c, _r);
-                            }
+                    for (var _rc = 0; _rc < _cols; _rc++) {
+                        for (var _rr = 0; _rr < _rows; _rr++) {
+                            var _o = _grid[_rc][_rr];
+                            if (_o != undefined && _o.color_id == _target) _match_add(_clearmap, _clearlist, _rc, _rr);
                         }
                     }
                     break;
@@ -110,30 +137,42 @@ function match_resolve(_grid, _groups, _swap_cells, _combo, _cols, _rows) {
         _idx++;
     }
 
-    // --- collect letters + count for damage (a spawned-special cell still counts as cleared) ---
+    return _clearlist;
+}
+
+/// @desc Shared damage/letter/charge accounting for any clear list.
+function clearlist_resolve(_grid, _clearlist, _combo, _cols, _rows) {
     var _letters = "";
+    var _bonus = 0;
+    var _divine_cleared = false;
+
     for (var i = 0; i < array_length(_clearlist); i++) {
         var _cell = _clearlist[i];
         var _t = _grid[_cell.col][_cell.row];
-        if (_t != undefined) _letters += string(_t.letter);
+        if (_t != undefined) {
+            var _letter = string_upper(string(_t.letter));
+            _letters += _letter;
+
+            if (variable_global_exists("level")) {
+                if (variable_struct_exists(global.level.letter_set, _letter)) _bonus += global.level.rules.verse_letter_bonus;
+                if (_t.is_divine) {
+                    global.level.plant_consumed = true;
+                    _divine_cleared = true;
+                }
+            }
+        }
     }
 
     var _n = array_length(_clearlist);
     var _damage = round(_n * DMG_PER_TILE * (1 + (_combo - 1) * CASCADE_BONUS));
 
-    // flatten special map
-    var _specials = [];
-    var _names = variable_struct_get_names(_spec_map);
-    for (var i = 0; i < array_length(_names); i++) {
-        array_push(_specials, _spec_map[$ _names[i]]);
-    }
-
     return {
-        clear_cells   : _clearlist,
-        specials      : _specials,
-        letters       : _letters,
+        clear_cells : _clearlist,
+        letters : _letters,
         tiles_cleared : _n,
-        damage        : _damage
+        damage : _damage,
+        charge : word_score(_letters) + _bonus,
+        divine_cleared : _divine_cleared
     };
 }
 

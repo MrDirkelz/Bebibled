@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_enemy_archetypes",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_enemy_archetypes",
+  "parent":{
+    "name":"Boss",
+    "path":"folders/Scripts/Boss.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -40,6 +40,15 @@ if (tile.type != TILE_TYPE.NORMAL) {
     draw_text(_l + 3, _t + 2, _mark);
 }
 
+// ---- divine verse-word marker ----
+if (tile.is_divine) {
+    draw_set_alpha(0.45);
+    draw_set_color(c_yellow);
+    draw_rectangle(_l - 4, _t - 4, _r + 4, _b + 4, true);
+    draw_rectangle(_l - 7, _t - 7, _r + 7, _b + 7, true);
+    draw_set_alpha(1);
+}
+
 // ---- letter glyph ----
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);

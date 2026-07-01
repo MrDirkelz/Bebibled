@@ -5,3 +5,4 @@
 ctrl    = noone;
 sel_col = -1;       // currently picked-up cell (-1 = none)
 sel_row = -1;
+trace_path = [];

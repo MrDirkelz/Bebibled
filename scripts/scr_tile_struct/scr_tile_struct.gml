@@ -38,6 +38,7 @@ function Tile(_color, _letter, _type = TILE_TYPE.NORMAL) constructor {
     type         = _type;
     status       = TILE_STATUS.NONE;
     status_turns = 0;
+    is_divine    = false;
     view         = noone;   // the obj_grid_tile instance rendering this cell (or noone)
 }
 
@@ -57,6 +58,9 @@ function tile_is_swappable(_tile) {
 
 /// @desc A random uppercase letter A-Z (uniform for now; can be weighted later).
 function tile_random_letter() {
+    if (variable_global_exists("level") && variable_struct_exists(global.level, "bag")) {
+        return tile_pick_letter();
+    }
     return chr(ord("A") + irandom(25));
 }
 

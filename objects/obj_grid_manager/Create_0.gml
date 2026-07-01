@@ -14,6 +14,7 @@ origin_y  = 400;
 
 anim_active = 0;                 // animation barrier: # of busy tile views (recounted each Step)
 global.grid_manager = id;        // singleton handle for coordinate helpers / input / views
+board_ready = false;
 
 // =========================================================================
 // View helpers
@@ -67,6 +68,7 @@ clear_cells = function(_list) {
         var _cell = _list[i];
         var _t = grid[_cell.col][_cell.row];
         if (_t != undefined) {
+            if (_t.is_divine && variable_global_exists("level")) global.level.plant_consumed = true;
             if (_t.view != noone && instance_exists(_t.view)) _t.view.begin_clear();
             grid[_cell.col][_cell.row] = undefined;
         }
@@ -96,6 +98,69 @@ collapse_and_refill = function() {
         var _p = grid_cell_to_world(_s.col, _s.row);
         spawn_tile_view(_s.col, _s.row, _s.tile, _p.y - board_h); // start above the board
     }
+};
+
+/// most common color currently on the board (used by Cleanse)
+most_common_color = function() {
+    var _counts = array_create(COLOR.COUNT, 0);
+    for (var _c = 0; _c < cols; _c++) {
+        for (var _r = 0; _r < rows; _r++) {
+            var _t = grid[_c][_r];
+            if (_t != undefined && tile_is_matchable(_t)) _counts[_t.color_id]++;
+        }
+    }
+
+    var _best = 0;
+    for (var i = 1; i < COLOR.COUNT; i++) {
+        if (_counts[i] > _counts[_best]) _best = i;
+    }
+    return _best;
+};
+
+/// cells of one color as a clear list (used by Cleanse)
+clear_color = function(_color) {
+    var _list = [];
+    for (var _c = 0; _c < cols; _c++) {
+        for (var _r = 0; _r < rows; _r++) {
+            var _t = grid[_c][_r];
+            if (_t != undefined && tile_is_matchable(_t) && _t.color_id == _color) {
+                array_push(_list, { col : _c, row : _r });
+            }
+        }
+    }
+    return _list;
+};
+
+/// relabel up to _count normal tiles from the current verse bag (used by Manna)
+reletter_random = function(_count) {
+    var _cells = [];
+    for (var _c = 0; _c < cols; _c++) {
+        for (var _r = 0; _r < rows; _r++) {
+            var _t = grid[_c][_r];
+            if (_t != undefined && _t.type == TILE_TYPE.NORMAL && _t.status == TILE_STATUS.NONE) {
+                array_push(_cells, { col : _c, row : _r });
+            }
+        }
+    }
+
+    for (var i = 0; i < min(_count, array_length(_cells)); i++) {
+        var _pick = i + irandom(array_length(_cells) - 1 - i);
+        var _tmp = _cells[i]; _cells[i] = _cells[_pick]; _cells[_pick] = _tmp;
+        var _cell = _cells[i];
+        grid[_cell.col][_cell.row].letter = tile_random_letter();
+    }
+};
+
+plant_fresh_divine = function() {
+    if (!variable_global_exists("level")) return;
+    global.level.plant_list = plant_choose_words(global.level.plant_candidates, global.level.rules, irandom(1000000));
+    plant_words(grid, cols, rows, global.level.plant_list, global.level.rules);
+};
+
+maybe_replant = function() {
+    if (!variable_global_exists("level")) return;
+    if (!global.level.plant_consumed) return;
+    plant_fresh_divine();
 };
 
 /// are there any empty cells right now? (boss destroy actions create them)
@@ -159,9 +224,11 @@ freeze_tile = function(_c, _r, _turns) {
 transform_tile = function(_c, _r, _color, _type) {
     var _t = grid[_c][_r];
     if (_t == undefined) return;
+    if (_t.is_divine && variable_global_exists("level")) global.level.plant_consumed = true;
     _t.color_id = _color;
     _t.type = _type;
     _t.status = TILE_STATUS.NONE;
+    _t.is_divine = false;
 };
 
 destroy_tile = function(_c, _r) {
@@ -203,17 +270,31 @@ get_random_cells = function(_n) {
 };
 
 // =========================================================================
-// Build the starting board (no instant matches) and spawn its views
+// Build the starting board (called by the controller after level_load)
 // =========================================================================
 
-grid = array_create(cols);
-for (var _c = 0; _c < cols; _c++) {
-    grid[_c] = array_create(rows, undefined);
-}
-grid_fill_no_matches(grid, cols, rows);
+build_board = function() {
+    with (obj_grid_tile) instance_destroy();
 
-for (var _c = 0; _c < cols; _c++) {
-    for (var _r = 0; _r < rows; _r++) {
-        spawn_tile_view(_c, _r, grid[_c][_r], undefined);
+    board_ready = false;
+    grid = array_create(cols);
+    for (var _c = 0; _c < cols; _c++) {
+        grid[_c] = array_create(rows, undefined);
     }
-}
+
+    if (variable_global_exists("level")) random_set_seed(global.level.seed);
+    grid_fill_no_matches(grid, cols, rows);
+    if (variable_global_exists("level")) plant_words(grid, cols, rows, global.level.plant_list, global.level.rules);
+
+    for (var _c = 0; _c < cols; _c++) {
+        for (var _r = 0; _r < rows; _r++) {
+            spawn_tile_view(_c, _r, grid[_c][_r], undefined);
+        }
+    }
+
+    anim_active = 0;
+    board_ready = true;
+};
+
+grid = array_create(cols);
+for (var _c = 0; _c < cols; _c++) grid[_c] = array_create(rows, undefined);

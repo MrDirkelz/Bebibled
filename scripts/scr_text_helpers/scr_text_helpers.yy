@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_text_helpers",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_text_helpers",
+  "parent":{
+    "name":"Bible",
+    "path":"folders/Scripts/Bible.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

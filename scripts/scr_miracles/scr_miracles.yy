@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_miracles",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_miracles",
+  "parent":{
+    "name":"Miracles",
+    "path":"folders/Scripts/Miracles.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

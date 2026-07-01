@@ -29,17 +29,34 @@ function word_score(_letters) {
     return _sum + max(0, _len - 2);
 }
 
-/// @desc Initialise the (stub) dictionary. Swap for an Included File load later.
+/// @desc Initialise the KJV dictionary from the wrapped per-book data.
 function word_init_dictionary() {
+    if (variable_global_exists("word_dict_ready") && global.word_dict_ready) return;
+
     global.word_dict = {};
-    var _words = ["CAT", "DOG", "SUN", "STAR", "FIRE", "ICE", "GEM", "RUNE", "MAGE", "HERO"];
-    for (var i = 0; i < array_length(_words); i++) {
-        global.word_dict[$ _words[i]] = true;
+    bible_build_indices();
+
+    for (var _book = 0; _book < array_length(global.bible_files); _book++) {
+        var _book_data = bible_ensure_book_loaded(_book);
+        if (!is_array(_book_data)) continue;
+
+        for (var _chapter = 0; _chapter < array_length(_book_data); _chapter++) {
+            var _chapter_data = _book_data[_chapter];
+            for (var _verse = 0; _verse < array_length(_chapter_data); _verse++) {
+                var _words = text_alpha_words(string(_chapter_data[_verse]), 1, false);
+                for (var i = 0; i < array_length(_words); i++) {
+                    global.word_dict[$ _words[i]] = true;
+                }
+            }
+        }
     }
+
+    global.word_dict_ready = true;
 }
 
 /// @desc Is the given string a known word? (hook for the exact-word mechanic)
 function word_is_valid(_str) {
     if (!variable_global_exists("word_dict")) return false;
-    return variable_struct_exists(global.word_dict, string_upper(_str));
+    var _word = string_upper(_str);
+    return variable_struct_exists(global.word_dict, _word);
 }
