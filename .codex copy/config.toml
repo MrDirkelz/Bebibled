@@ -1,0 +1,7 @@
+[mcp_servers.gamemaker-resource-tool]
+command = "npx"
+args = [
+    "@gamemaker/gm-cli@latest",
+    "resourcetool",
+    "mcp",
+]

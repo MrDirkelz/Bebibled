@@ -1,0 +1,1 @@
+Never read more tthe files in this folder directly. Ask the developer what the data structure looks like. Or adhere to the design_docs

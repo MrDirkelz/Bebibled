@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_match_resolve",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_match_resolve",
+  "parent":{
+    "name":"Match",
+    "path":"folders/Scripts/Match.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

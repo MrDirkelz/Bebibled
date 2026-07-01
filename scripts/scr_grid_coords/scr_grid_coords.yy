@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_grid_coords",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_grid_coords",
+  "parent":{
+    "name":"Grid",
+    "path":"folders/Scripts/Grid.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

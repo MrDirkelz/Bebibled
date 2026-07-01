@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_tile_struct",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_tile_struct",
+  "parent":{
+    "name":"Tile",
+    "path":"folders/Scripts/Tile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

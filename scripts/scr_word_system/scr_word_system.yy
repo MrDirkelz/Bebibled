@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_word_system",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_word_system",
+  "parent":{
+    "name":"Word",
+    "path":"folders/Scripts/Word.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
